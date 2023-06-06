@@ -1,0 +1,32 @@
+---
+title: "ENTRES-709 JS messaging Data Compilation"
+author: "Brendon Kaufman"
+date: "9/2/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+
+library(tidyverse)
+library(googlesheets4)
+
+```
+
+```{r read-in-coded-data}
+
+coding_sheet_google_file_id <- "https://docs.google.com/spreadsheets/d/1SnfiqYZ8qDDRT2iQHlWTpfxSqp7nbdiHUpqsEFTcWfg/edit#gid=0"
+sheet_name = "text_data_coding"
+
+coded_data_df <- read_sheet(ss = coding_sheet_google_file_id,
+                                       sheet = sheet_name,
+                                       range = "A1:AE600")
+
+```
+
+
+```{r save dataframes to csv}
+
+write_csv(coded_data_df, "coded_data_df.csv")
+
+```

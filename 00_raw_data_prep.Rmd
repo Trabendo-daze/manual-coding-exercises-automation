@@ -1,0 +1,51 @@
+---
+title: "Raw Data Preparation"
+author: "Brendon Kaufman"
+date: "9/2/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+
+library(tidyverse)
+library(googlesheets4)
+
+set.seed(396)
+
+```
+
+```{r load-in-data}
+
+text_data_df <- read_csv("sample_text_data.csv")
+
+```
+
+
+```{r create-columns-for-themes}
+
+text_data_df_modified <- text_data_df %>%
+  add_column(flag_ui = "",
+             flag_customer_service = "",
+             flag_buttons = ""
+             ) 
+
+
+```
+
+
+```{r write-csv-to-google-sheet}
+
+coding_sheet_google_file_id <- "https://docs.google.com/spreadsheets/d/1SnfiqYZ8qDDRT2iQHlWTpfxSqp7nbdiHUpqsEFTcWfg/edit#gid=0"
+sheet_name = "text_data_coding"
+
+sheet_write(data = text_data_df_modified,
+            ss = coding_sheet_google_file_id,
+            sheet = sheet_name)
+
+range_autofit(coding_sheet_google_file_id, 
+              sheet = sheet_name,
+              dimension = c("columns", "rows"))
+
+```
+
