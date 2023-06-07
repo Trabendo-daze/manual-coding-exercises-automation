@@ -1,7 +1,7 @@
 ---
-title: "ENTRES-709 JS messaging Data Compilation"
+title: "Simplifying Manual Coding Exercises - Coded Data Prep"
 author: "Brendon Kaufman"
-date: "9/2/2021"
+date: "6/15/2023"
 output: html_document
 ---
 
@@ -13,20 +13,31 @@ library(googlesheets4)
 
 ```
 
+A manual coding exercise is a methodology for analyzing text data where analysts read through individual pieces of text data and label it for the presence or absence of a set number of themes (called codes) in order to quantify the frequency of those themes in the data. This series of RMarkdown documents is part of a series (based on [these slides](https://docs.google.com/presentation/d/186nlOl_pF6Xn63jRMM1Xq0RF8YnDiBtAdOBc_laLDMQ/edit#slide=id.g226e05ac205_1_113)) aimed at simplifying this process by taking advantage of R and RStudio. Note that this workflow is best done within an **RStudio Project Folder.**
+
+This RMarkdown document takes a Google Sheet of coded raw text data and prepares it for analysis in RStudio. It does this through the following steps:
+
+1.  Reads coded data from a Google Sheet to a dataframe
+2.  Saves the dataframe locally to the folder associated with an RStudio Project
+
 ```{r read-in-coded-data}
 
-coding_sheet_google_file_id <- "https://docs.google.com/spreadsheets/d/1SnfiqYZ8qDDRT2iQHlWTpfxSqp7nbdiHUpqsEFTcWfg/edit#gid=0"
+# Reads coded data from a Google Sheet to a dataframe
+
+# Designate Google Sheet url and sheet name
+
+coding_sheet_google_file_id <- "https://docs.google.com/spreadsheets/d/1SnfiqYZ8qDDRT2iQHlWTpfxSqp7nbdiHUpqsEFTcWfg/edit#gid=1273390617"
 sheet_name = "text_data_coding"
 
 coded_data_df <- read_sheet(ss = coding_sheet_google_file_id,
-                                       sheet = sheet_name,
-                                       range = "A1:AE600")
+                            sheet = sheet_name,
+                            range = "A1:E11")
 
 ```
 
+```{r save-dataframe-to-csv}
 
-```{r save dataframes to csv}
+# Save dataframe to .csv file in RStudio Project
 
 write_csv(coded_data_df, "coded_data_df.csv")
-
 ```

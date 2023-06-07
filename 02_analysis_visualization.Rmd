@@ -1,14 +1,8 @@
 ---
-title: "Analysis of Initial JS message content (ENTRES-709)"
+title: "Simplifying Manual Coding Exercises - Analysis and Visualization"
 author: "Brendon Kaufman"
-date: "2/2/2022"
-output:
-  html_document: 
-    toc: true
-    toc_float:
-      collapsed: false
-      smooth_scroll: false
-    df_print: paged
+date: "6/15/2023"
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -16,56 +10,84 @@ output:
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 library(tidyverse)
-library(googlesheets4)
+library(scales)
+
+```
+
+A manual coding exercise is a methodology for analyzing text data where analysts read through individual pieces of text data and label it for the presence or absence of a set number of themes (called codes) in order to quantify the frequency of those themes in the data. This series of RMarkdown documents is part of a series (based on [these slides](https://docs.google.com/presentation/d/186nlOl_pF6Xn63jRMM1Xq0RF8YnDiBtAdOBc_laLDMQ/edit#slide=id.g226e05ac205_1_113)) aimed at simplifying this process by taking advantage of R and RStudio. Note that this workflow is best done within an **RStudio Project Folder.**
+
+This RMarkdown document takes a .csv file coded raw text data, prepares that data for analysis and quantifies how often a given code occurs among the data. It does this through the following steps:
+
+1.  Reads coded data from a .csv to a dataframe
+2.  Prepares the dataframe for analysis including getting rid of uncoded data
+3.  Creates an analysis dataframe quantifying how often codes exist in the data
+3.  Creates a data visualization displaying how often codes exist in the data
+
+```{r load-coded-text-data}
+
+# Reads coded data from a .csv to a dataframe
 
 coded_data_df <- read_csv("coded_data_df.csv") 
 
-coded_data_df_mod <- coded_data_df %>%
-  mutate(across(contains("flag"),
+```
+
+```{r prepare-dataframe-for-analysis}
+
+# Prepares the dataframe for analysis including getting rid of uncoded data
+
+coded_data_df_prepared <- coded_data_df %>%
+  mutate(across(contains("code_"), # Changes all cells marked "x" for presence of code to boolean TRUE to facilitate counting
                 .fns = function(.x) case_when(.x == "x" ~ TRUE,
                                               TRUE ~ FALSE))) %>%
   rowwise() %>%
-  mutate(is_coded = sum(c_across(starts_with("flag"))) > 0) %>% 
+  mutate(is_coded = sum(c_across(starts_with("code_"))) > 0) %>% # Determines if row has been coded or not
   ungroup() %>%
-  filter(is_coded) %>% # get rid of rows that don't have any columns coded
-  select( # get rid of rows with all NAs
-    where(
-      ~sum(!is.na(.x)) > 0
-    ))
+  filter(is_coded) # Gets rid of rows that don't have any columns coded
 
 ```
 
 
-```{r manipulate-data, fig.width = 14, fig.height= 6}
+```{r create-analysis-dataframe}
 
-coded_data_analysis_df <- coded_data_df_mod %>%
-  summarise(across(contains("flag"), .fns = function(.x) round(mean(.x), 2))) %>%
-  pivot_longer(cols = contains("flag"), names_to = "tag", values_to = "proportion_of_messages") %>%
-  mutate(tag_plain_text = case_when(tag == "flag_ui" ~ "UI",
-                                    tag == "flag_customer_service" ~ "Customer Service",
-                                    tag == "flag_buttons" ~ "Buttons"))
+# Creates an analysis dataframe quantifying how often codes exist in the data
+
+coded_data_df_analysis <- coded_data_df_prepared %>%
+  summarise(across(contains("code_"), # Quantifies % of rows with each code
+                   .fns = function(.x) round(mean(.x), 2))) %>% 
+  pivot_longer(cols = contains("code_"), # Reformats columns for visualization
+               names_to = "code", 
+               values_to = "proportion_of_rows") %>%
+  mutate(code_plain_text = case_when(code == "code_ui" ~ "UI", # Adds plain text column for visualization
+                                    code == "code_customer_service" ~ "Customer Service",
+                                    code == "code_buttons" ~ "Buttons",
+                                    code == "code_other" ~ "Other"),
+         .after = code)  # Places new column after code column
 
 ```
 
-```{r plot-data}
+```{r plot-data, fig.width = 14, fig.height= 6}
 
+# Creates a data visualization displaying how often codes exist in the data
 
-ggplot(coded_data_analysis_df) +
-  geom_col(aes(x = reorder(tag_plain_text, proportion_of_messages), y = proportion_of_messages),
-           fill = "#237EA3") +
-  geom_text(aes(x = tag_plain_text, y = proportion_of_messages, label = proportion_of_messages),
-            nudge_y = 0.15,
-            size = 8) +
-  labs(x = "", y = "Proportion of comments",
-       title = "Proportion of comments with theme",
-       subtitle = paste0("Comments can have multiple tags (n = ",
-                        nrow(coded_data_analysis_df),
-                        ")")) +
-  coord_flip() +
-  theme(plot.title = element_text(margin = margin(0,0,20,0),
-                                  size = 16),
-        axis.text.x = element_blank(),
-        plot.subtitle = element_text(size = 14)) 
+ggplot(coded_data_df_analysis) +
+  
+  geom_col(aes(x = reorder(code_plain_text, proportion_of_rows), y = proportion_of_rows),
+           fill = "#237EA3") + # Bar plot ordered by proportion of rows
+  
+  geom_text(aes(x = code_plain_text, y = proportion_of_rows, label = percent(proportion_of_rows)),
+            nudge_y = 0.02,
+            size = 4) + # Adds a text label above the bars
+  
+  labs(x = "", y = "Proportion of pieces of text data",
+       title = "Proportion of pieces of text data with theme",
+       subtitle = paste0("Pieces of text data can have multiple tags (n = ",
+                        nrow(coded_data_df_prepared),
+                        ")")) + # Adds labels to axes including a dynamic one for sample size
+  
+  coord_flip() + # Flips plot because these plots are often best displayed horizontally
+  
+  theme_bw()
+
 
 
 ```

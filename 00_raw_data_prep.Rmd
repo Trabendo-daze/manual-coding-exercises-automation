@@ -1,7 +1,7 @@
 ---
-title: "Raw Data Preparation"
+title: "Simplifying Manual Coding Exercises - Raw Data Prep"
 author: "Brendon Kaufman"
-date: "9/2/2021"
+date: "6/15/2023"
 output: html_document
 ---
 
@@ -11,41 +11,59 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE)
 library(tidyverse)
 library(googlesheets4)
 
-set.seed(396)
-
 ```
 
+A manual coding exercise is a methodology for analyzing text data where analysts read through individual pieces of text data and label it for the presence or absence of a set number of themes (called codes) in order to quantify the frequency of those themes in the data. This series of RMarkdown documents is part of a series (based on [these slides](https://docs.google.com/presentation/d/186nlOl_pF6Xn63jRMM1Xq0RF8YnDiBtAdOBc_laLDMQ/edit#slide=id.g226e05ac205_1_113)) aimed at simplifying this process by taking advantage of R and RStudio. Note that this workflow is best done within an **RStudio Project Folder.**
+
+This RMarkdown document takes a data set of raw text data and prepares it for a manual coding exercise in Google Sheets. It does this through the following steps:
+
+1.  Reads the data from a saved .csv file in an RStudio Project to a dataframe
+2.  Adds columns to the dataframe for codes that will be used to label the text data
+3.  Writes the dataframe to a Google Sheet that can be used to label the text data
+
 ```{r load-in-data}
+
+# Read in text data from .csv to dataframe
 
 text_data_df <- read_csv("sample_text_data.csv")
 
 ```
 
+```{r create-columns-for-codes}
 
-```{r create-columns-for-themes}
+# Create empty columns for codes that will be used to label the text data
+# Note that each code starts with "code_" so that we will be able to easily
+# identify and select the columns that refer to codes later in analysis
 
-text_data_df_modified <- text_data_df %>%
-  add_column(flag_ui = "",
-             flag_customer_service = "",
-             flag_buttons = ""
+text_data_df_columns_added <- text_data_df %>%
+  add_column(code_ui = "",
+             code_customer_service = "",
+             code_buttons = "",
+             code_other = ""
              ) 
 
 
 ```
 
-
 ```{r write-csv-to-google-sheet}
 
-coding_sheet_google_file_id <- "https://docs.google.com/spreadsheets/d/1SnfiqYZ8qDDRT2iQHlWTpfxSqp7nbdiHUpqsEFTcWfg/edit#gid=0"
+# Writes dataframe to a designated Google Sheet
+
+# Designate Google Sheet url and sheet name
+
+coding_sheet_google_file_id <- "https://docs.google.com/spreadsheets/d/1SnfiqYZ8qDDRT2iQHlWTpfxSqp7nbdiHUpqsEFTcWfg/edit#gid=1273390617"
 sheet_name = "text_data_coding"
 
-sheet_write(data = text_data_df_modified,
+# Write dataframe to that sheet
+
+write_sheet(data = text_data_df_columns_added,
             ss = coding_sheet_google_file_id,
             sheet = sheet_name)
 
-range_autofit(coding_sheet_google_file_id, 
+# Autofit cells to the text data to make it look a little nicer
+
+range_autofit(ss = coding_sheet_google_file_id, 
               sheet = sheet_name,
               dimension = c("columns", "rows"))
 
 ```
-
