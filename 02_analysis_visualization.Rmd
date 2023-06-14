@@ -14,7 +14,7 @@ library(scales)
 
 ```
 
-A manual coding exercise is a methodology for analyzing text data where analysts read through individual pieces of text data and label it for the presence or absence of a set number of themes (called codes) in order to quantify the frequency of those themes in the data. This series of RMarkdown documents is part of a series (based on [these slides](https://docs.google.com/presentation/d/186nlOl_pF6Xn63jRMM1Xq0RF8YnDiBtAdOBc_laLDMQ/edit#slide=id.g226e05ac205_1_113)) aimed at simplifying this process by taking advantage of R and RStudio. Note that this workflow is best done within an **RStudio Project Folder.**
+A manual coding exercise is a methodology for analyzing text data where analysts read through units of text data and label it for the presence or absence of a set number of themes (called codes) in order to quantify the frequency of those themes in the data. This series of RMarkdown documents is part of a series (based on [these slides](https://docs.google.com/presentation/d/186nlOl_pF6Xn63jRMM1Xq0RF8YnDiBtAdOBc_laLDMQ/edit#slide=id.g226e05ac205_1_113)) aimed at simplifying this process by taking advantage of R and RStudio. Note that this workflow is best done within an **RStudio Project Folder.**
 
 This RMarkdown document takes a .csv file coded raw text data, prepares that data for analysis and quantifies how often a given code occurs among the data. It does this through the following steps:
 
